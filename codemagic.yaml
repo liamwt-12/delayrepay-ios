@@ -1,0 +1,84 @@
+workflows:
+  ios-release:
+    name: iOS Release
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: uk.delayrepay.app
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+        APP_STORE_APPLE_ID: "6745404648"
+        BUNDLE_ID: "uk.delayrepay.app"
+      node: 18
+      xcode: latest
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Add iOS platform
+        script: |
+          npx cap add ios || true
+      - name: Sync web assets
+        script: |
+          npx cap sync ios
+      - name: Copy native plugins and entitlements
+        script: |
+          chmod +x scripts/post-sync.sh
+          ./scripts/post-sync.sh
+      - name: Copy app icon
+        script: |
+          if [ -f "resources/AppIcon.png" ]; then
+            echo "Setting up app icon..."
+            ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+            mkdir -p "$ICON_DIR"
+            cp resources/AppIcon.png "$ICON_DIR/AppIcon-1024x1024.png"
+            cat > "$ICON_DIR/Contents.json" << 'ICONEOF'
+          {
+            "images" : [
+              {
+                "filename" : "AppIcon-1024x1024.png",
+                "idiom" : "universal",
+                "platform" : "ios",
+                "size" : "1024x1024"
+              }
+            ],
+            "info" : {
+              "author" : "xcode",
+              "version" : 1
+            }
+          }
+          ICONEOF
+          fi
+      - name: Set build number
+        script: |
+          cd ios/App
+          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+      - name: Build archive
+        script: |
+          cd ios/App
+          xcodebuild archive \
+            -project App.xcodeproj \
+            -scheme "$XCODE_SCHEME" \
+            -destination "generic/platform=iOS" \
+            -archivePath build/App.xcarchive \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CODE_SIGN_STYLE="Manual"
+    artifacts:
+      - ios/App/build/App.xcarchive
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
