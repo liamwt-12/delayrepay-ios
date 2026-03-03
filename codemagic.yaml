@@ -76,16 +76,16 @@ workflows:
       - name: Use profiles
         script: |
           xcode-project use-profiles --project ios/App/App.xcodeproj
-      - name: Build archive
+      - name: Build IPA
         script: |
           cd ios/App
-          xcodebuild archive \
-            -project App.xcodeproj \
-            -scheme "$XCODE_SCHEME" \
-            -destination "generic/platform=iOS" \
-            -archivePath build/App.xcarchive
+          xcode-project build-ipa \
+            --project App.xcodeproj \
+            --scheme "$XCODE_SCHEME"
     artifacts:
-      - ios/App/build/App.xcarchive
+      - ios/App/build/ios/ipa/*.ipa
+      - ios/App/**/*.ipa
+      - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
         auth: integration
