@@ -6,9 +6,6 @@ workflows:
     integrations:
       app_store_connect: DelayRepay Codemagic
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: uk.delayrepay.app
       vars:
         XCODE_SCHEME: "App"
         APP_STORE_APPLE_ID: "6745404648"
@@ -65,14 +62,24 @@ workflows:
           agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
       - name: Fetch signing files
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-      - name: Create keychain and add certificates
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Set up keychain
         script: |
           keychain initialize
-          app-store-connect certificates list --type IOS_DISTRIBUTION --save || \
-          app-store-connect certificates create --type IOS_DISTRIBUTION --save
+      - name: Fetch certificates
+        script: |
+          app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
+            --save || \
+          app-store-connect certificates create \
+            --type IOS_DISTRIBUTION \
+            --save
+      - name: Add certs to keychain
+        script: |
           keychain add-certificates
-      - name: Set up code signing
+      - name: Use profiles
         script: |
           xcode-project use-profiles --project ios/App/App.xcodeproj
       - name: Build archive
