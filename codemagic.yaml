@@ -60,22 +60,20 @@ workflows:
         script: |
           cd ios/App
           agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
       - name: Set up keychain
         script: |
           keychain initialize
-      - name: Fetch certificates
+      - name: Create certificate and profiles
         script: |
-          app-store-connect certificates list \
-            --type IOS_DISTRIBUTION \
-            --save || \
           app-store-connect certificates create \
             --type IOS_DISTRIBUTION \
+            --save || \
+          app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
             --save
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
       - name: Add certs to keychain
         script: |
           keychain add-certificates
