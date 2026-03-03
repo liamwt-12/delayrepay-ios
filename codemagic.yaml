@@ -63,9 +63,18 @@ workflows:
         script: |
           cd ios/App
           agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1))
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+      - name: Create keychain and add certificates
+        script: |
+          keychain initialize
+          app-store-connect certificates list --type IOS_DISTRIBUTION --save || \
+          app-store-connect certificates create --type IOS_DISTRIBUTION --save
+          keychain add-certificates
       - name: Set up code signing
         script: |
-          xcode-project use-profiles
+          xcode-project use-profiles --project ios/App/App.xcodeproj
       - name: Build archive
         script: |
           cd ios/App
@@ -73,8 +82,7 @@ workflows:
             -project App.xcodeproj \
             -scheme "$XCODE_SCHEME" \
             -destination "generic/platform=iOS" \
-            -archivePath build/App.xcarchive \
-            CODE_SIGN_STYLE="Manual"
+            -archivePath build/App.xcarchive
     artifacts:
       - ios/App/build/App.xcarchive
     publishing:
