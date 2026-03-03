@@ -10,7 +10,7 @@ workflows:
         XCODE_SCHEME: "App"
         APP_STORE_APPLE_ID: "6745404648"
         BUNDLE_ID: "uk.delayrepay.app"
-      node: 18
+      node: 22
       xcode: latest
     triggering:
       events:
