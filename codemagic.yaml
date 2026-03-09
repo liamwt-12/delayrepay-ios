@@ -61,7 +61,7 @@ workflows:
       - name: Set build number
         script: |
           cd ios/App
-          agvtool new-version -all 10
+          agvtool new-version -all 11
       - name: Set up keychain
         script: |
           keychain initialize
@@ -74,8 +74,8 @@ workflows:
         script: |
           keychain add-certificates
       - name: Use profiles
-        script: |
-          xcode-project use-profiles --project ios/App/App.xcodeproj
+        script: |          xcode-project use-profiles --project 
+ios/App/App.xcodeproj
       - name: Build IPA
         script: |
           cd ios/App
