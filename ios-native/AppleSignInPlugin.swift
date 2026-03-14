@@ -1,38 +1,42 @@
-import AuthenticationServices
 import Capacitor
+import AuthenticationServices
 
 @objc(AppleSignInPlugin)
 public class AppleSignInPlugin: CAPPlugin, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-
-    @objc func authorize(_ call: CAPPluginCall) {
-        DispatchQueue.main.async {
-            let request = ASAuthorizationAppleIDProvider().createRequest()
-            request.requestedScopes = [.email, .fullName]
-            let controller = ASAuthorizationController(authorizationRequests: [request])
-            controller.delegate = self
-            controller.presentationContextProvider = self
-            self.bridge?.saveCall(call)
-            controller.performRequests()
+    
+    private var savedCall: CAPPluginCall?
+    
+    @objc func signIn(_ call: CAPPluginCall) {
+        self.savedCall = call
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+    
+    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return UIApplication.shared.windows.first!
+    }
+    
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            let result: [String: Any] = [
+                "identityToken": String(data: credential.identityToken ?? Data(), encoding: .utf8) ?? "",
+                "user": credential.user,
+                "email": credential.email ?? "",
+                "givenName": credential.fullName?.givenName ?? "",
+                "familyName": credential.fullName?.familyName ?? ""
+            ]
+            self.savedCall?.resolve(result)
+            self.savedCall = nil
         }
     }
-
-    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return self.bridge?.webView?.window ?? UIWindow()
-    }
-
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let cred = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
-        let token = String(data: cred.identityToken ?? Data(), encoding: .utf8) ?? ""
-        let result: [String: Any] = [
-            "identityToken": token,
-            "user": cred.user,
-            "givenName": cred.fullName?.givenName ?? "",
-            "familyName": cred.fullName?.familyName ?? ""
-        ]
-        self.bridge?.savedCalls.values.first?.resolve(result)
-    }
-
+    
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        self.bridge?.savedCalls.values.first?.reject("Sign in failed", nil, error)
+        self.savedCall?.reject("Sign in failed", nil, error)
+        self.savedCall = nil
     }
 }
