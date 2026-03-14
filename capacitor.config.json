@@ -2,10 +2,6 @@
   "appId": "uk.delayrepay.app",
   "appName": "DelayRepay",
   "webDir": "www",
-  "server": {
-    "url": "https://delayrepay.uk",
-    "cleartext": false
-  },
   "ios": {
     "contentInset": "always",
     "allowsLinkPreview": false,
