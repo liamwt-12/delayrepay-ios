@@ -61,7 +61,7 @@ workflows:
       - name: Set build number
         script: |
           cd ios/App
-          agvtool new-version -all 11
+          agvtool new-version -all 12
       - name: Set up keychain
         script: |
           keychain initialize
