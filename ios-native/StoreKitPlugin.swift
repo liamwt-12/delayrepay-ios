@@ -7,7 +7,7 @@ public class StoreKitPlugin: CAPPlugin {
     @objc func getProducts(_ call: CAPPluginCall) {
         Task {
             do {
-                let products = try await Product.products(for: ["6759902262", "6759902546"])
+                let products = try await Product.products(for: ["uk.delayrepay.pro.yearly", "uk.delayrepay.pro.monthly"])
                 var result: [[String: Any]] = []
                 for product in products {
                     result.append([
