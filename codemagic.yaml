@@ -9,10 +9,9 @@ workflows:
       groups:
         - code-signing
       vars:
-        XCODE_SCHEME: "App"
-        APP_STORE_APPLE_ID: "6745404648"
+        XCODE_SCHEME: "DelayRepay"
+        APP_STORE_APPLE_ID: "6759646628"
         BUNDLE_ID: "uk.delayrepay.app"
-      node: 22
       xcode: latest
     triggering:
       events:
@@ -21,47 +20,13 @@ workflows:
         - pattern: main
           include: true
     scripts:
-      - name: Install dependencies
-        script: |
-          npm install
-      - name: Add iOS platform
-        script: |
-          npx cap add ios || true
-      - name: Sync web assets
-        script: |
-          npx cap sync ios
-      - name: Copy native plugins and entitlements
-        script: |
-          chmod +x scripts/post-sync.sh
-          ./scripts/post-sync.sh
-      - name: Copy app icon
-        script: |
-          if [ -f "resources/AppIcon.png" ]; then
-            echo "Setting up app icon..."
-            ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
-            mkdir -p "$ICON_DIR"
-            cp resources/AppIcon.png "$ICON_DIR/AppIcon-1024x1024.png"
-            cat > "$ICON_DIR/Contents.json" << 'ICONEOF'
-          {
-            "images" : [
-              {
-                "filename" : "AppIcon-1024x1024.png",
-                "idiom" : "universal",
-                "platform" : "ios",
-                "size" : "1024x1024"
-              }
-            ],
-            "info" : {
-              "author" : "xcode",
-              "version" : 1
-            }
-          }
-          ICONEOF
-          fi
       - name: Set build number
         script: |
-          cd ios/App
-          agvtool new-version -all 17
+          cd App
+          agvtool new-version -all 1
+      - name: Copy app icon
+        script: |
+          cp App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png || true
       - name: Set up keychain
         script: |
           keychain initialize
@@ -75,16 +40,15 @@ workflows:
           keychain add-certificates
       - name: Use profiles
         script: |
-          xcode-project use-profiles --project ios/App/App.xcodeproj
+          xcode-project use-profiles --project App/App.xcodeproj
       - name: Build IPA
         script: |
-          cd ios/App
+          cd App
           xcode-project build-ipa \
             --project App.xcodeproj \
             --scheme "$XCODE_SCHEME"
     artifacts:
-      - ios/App/build/ios/ipa/*.ipa
-      - ios/App/**/*.ipa
+      - App/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
