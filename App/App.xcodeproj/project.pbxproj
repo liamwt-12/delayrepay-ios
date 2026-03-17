@@ -12,7 +12,6 @@ A1000002 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 
 A1000003 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000003 /* StoreKitManager.swift */; };
 A1000004 /* AppleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000004 /* AppleSignInManager.swift */; };
 A1000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000005 /* Assets.xcassets */; };
-A1000006 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B1000006 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,7 +21,6 @@ B1000002 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType
 B1000003 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
 B1000004 /* AppleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInManager.swift; sourceTree = "<group>"; };
 B1000005 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-B1000006 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 B1000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 B1000008 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -54,7 +52,6 @@ B1000002 /* ViewController.swift */,
 B1000003 /* StoreKitManager.swift */,
 B1000004 /* AppleSignInManager.swift */,
 B1000005 /* Assets.xcassets */,
-B1000006 /* LaunchScreen.storyboard */,
 B1000007 /* Info.plist */,
 B1000008 /* App.entitlements */,
 );
@@ -128,7 +125,6 @@ isa = PBXResourcesBuildPhase;
 buildActionMask = 2147483647;
 files = (
 A1000005 /* Assets.xcassets in Resources */,
-A1000006 /* LaunchScreen.storyboard in Resources */,
 );
 runOnlyForDeploymentPostprocessing = 0;
 };
