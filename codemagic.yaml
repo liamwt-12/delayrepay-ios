@@ -23,7 +23,7 @@ workflows:
       - name: Set build number
         script: |
           cd App
-          agvtool new-version -all 18
+          agvtool new-version -all 19
       - name: Copy app icon
         script: |
           cp App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png || true
