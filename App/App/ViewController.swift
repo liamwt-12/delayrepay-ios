@@ -24,7 +24,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHan
         webView = WKWebView(frame: view.bounds, configuration: config)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.contentInsetAdjustmentBehavior = .always
         view.addSubview(webView)
 
         NotificationCenter.default.addObserver(self, selector: #selector(pushTokenReceived(_:)), name: NSNotification.Name("PushTokenReceived"), object: nil)
