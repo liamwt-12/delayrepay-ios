@@ -5,10 +5,8 @@ class AppleSignInManager: NSObject, ASAuthorizationControllerDelegate, ASAuthori
 
     var onSuccess: ((String, String, String) -> Void)?
     var onError: ((String) -> Void)?
-    weak var presentingViewController: UIViewController?
 
     func signIn(presentingViewController: UIViewController, onSuccess: @escaping (String, String, String) -> Void, onError: @escaping (String) -> Void) {
-        self.presentingViewController = presentingViewController
         self.onSuccess = onSuccess
         self.onError = onError
 
@@ -23,7 +21,10 @@ class AppleSignInManager: NSObject, ASAuthorizationControllerDelegate, ASAuthori
     }
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return presentingViewController?.view.window ?? UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }.first ?? UIWindow()
+        let scenes = UIApplication.shared.connectedScenes
+        let windowScene = scenes.first as? UIWindowScene
+        let window = windowScene?.windows.first(where: { $0.isKeyWindow }) ?? windowScene?.windows.first ?? UIWindow()
+        return window
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
@@ -39,6 +40,12 @@ class AppleSignInManager: NSObject, ASAuthorizationControllerDelegate, ASAuthori
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        let nsError = error as NSError
+        // User cancelled is not a real error
+        if nsError.code == ASAuthorizationError.canceled.rawValue {
+            onError?("cancelled")
+            return
+        }
         onError?(error.localizedDescription)
     }
 }
