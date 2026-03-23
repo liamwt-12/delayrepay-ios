@@ -1,12 +1,17 @@
 import AuthenticationServices
 import UIKit
 
-class AppleSignInManager: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+/// Handles Sign in with Apple authentication flow.
+class AppleSignInManager: NSObject {
 
-    var onSuccess: ((String, String, String) -> Void)?
-    var onError: ((String) -> Void)?
+    private var onSuccess: ((String, String, String) -> Void)?
+    private var onError: ((String) -> Void)?
 
-    func signIn(presentingViewController: UIViewController, onSuccess: @escaping (String, String, String) -> Void, onError: @escaping (String) -> Void) {
+    func signIn(
+        presentingViewController: UIViewController,
+        onSuccess: @escaping (String, String, String) -> Void,
+        onError: @escaping (String) -> Void
+    ) {
         self.onSuccess = onSuccess
         self.onError = onError
 
@@ -19,33 +24,83 @@ class AppleSignInManager: NSObject, ASAuthorizationControllerDelegate, ASAuthori
         controller.presentationContextProvider = self
         controller.performRequests()
     }
+}
 
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        let scenes = UIApplication.shared.connectedScenes
-        let windowScene = scenes.first as? UIWindowScene
-        let window = windowScene?.windows.first(where: { $0.isKeyWindow }) ?? windowScene?.windows.first ?? UIWindow()
-        return window
-    }
+// MARK: - ASAuthorizationControllerDelegate
 
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-              let tokenData = credential.identityToken,
-              let token = String(data: tokenData, encoding: .utf8) else {
-            onError?("Failed to get identity token")
+extension AppleSignInManager: ASAuthorizationControllerDelegate {
+
+    func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithAuthorization authorization: ASAuthorization
+    ) {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            onError?("Unexpected credential type")
+            cleanup()
             return
         }
+
+        guard let tokenData = credential.identityToken,
+              let token = String(data: tokenData, encoding: .utf8) else {
+            onError?("Failed to decode identity token")
+            cleanup()
+            return
+        }
+
         let user = credential.user
         let email = credential.email ?? ""
+
         onSuccess?(token, user, email)
+        cleanup()
     }
 
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithError error: Error
+    ) {
         let nsError = error as NSError
-        // User cancelled is not a real error
-        if nsError.code == ASAuthorizationError.canceled.rawValue {
-            onError?("cancelled")
-            return
+
+        if nsError.domain == ASAuthorizationError.errorDomain {
+            switch ASAuthorizationError.Code(rawValue: nsError.code) {
+            case .canceled:
+                onError?("cancelled")
+            case .failed:
+                onError?("Sign in failed. Please try again.")
+            case .invalidResponse:
+                onError?("Invalid response from Apple. Please try again.")
+            case .notHandled:
+                onError?("Sign in request was not handled.")
+            case .notInteractive:
+                onError?("Sign in requires interaction.")
+            case .unknown:
+                onError?("An unknown error occurred. Please try again.")
+            default:
+                onError?(error.localizedDescription)
+            }
+        } else {
+            onError?(error.localizedDescription)
         }
-        onError?(error.localizedDescription)
+
+        cleanup()
+    }
+
+    private func cleanup() {
+        onSuccess = nil
+        onError = nil
+    }
+}
+
+// MARK: - ASAuthorizationControllerPresentationContextProviding
+
+extension AppleSignInManager: ASAuthorizationControllerPresentationContextProviding {
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        if let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }),
+           let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first {
+            return window
+        }
+        return UIWindow()
     }
 }

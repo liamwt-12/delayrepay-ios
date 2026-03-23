@@ -1,57 +1,58 @@
 workflows:
-  ios-release:
-    name: iOS Release
+  delayrepay-ios:
+    name: DelayRepay iOS
     max_build_duration: 30
     instance_type: mac_mini_m1
-    integrations:
-      app_store_connect: DelayRepay Codemagic
+    
     environment:
+      xcode: 16.2
       groups:
         - code-signing
       vars:
-        XCODE_SCHEME: "DelayRepay"
-        APP_STORE_APPLE_ID: "6759646628"
-        BUNDLE_ID: "uk.delayrepay.app"
-      xcode: "16.2"
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
+        BUNDLE_ID: uk.delayrepay.app
+        APP_STORE_ID: "6759646628"
+        XCODE_SCHEME: App
+        XCODE_PROJECT: App/App.xcodeproj
+    
+    integrations:
+      app_store_connect: DelayRepay Codemagic
+    
     scripts:
-      - name: Set build number
-        script: |
-          cd App
-          agvtool new-version -all 21
-      - name: Copy app icon
-        script: |
-          cp App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png App/App/Assets.xcassets/AppIcon.appiconset/AppIcon.png || true
-      - name: Set up keychain
-        script: |
-          keychain initialize
-      - name: Fetch signing files
+      - name: Set up code signing
         script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
-      - name: Add certs to keychain
-        script: |
+          keychain initialize
           keychain add-certificates
-      - name: Use profiles
+          xcode-project use-profiles
+
+      - name: Increment build number
         script: |
-          xcode-project use-profiles --project App/App.xcodeproj
-      - name: Build IPA
+          LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_ID" || echo "0")
+          NEW_BUILD=$((LATEST_BUILD + 1))
+          echo "Building version: $NEW_BUILD"
+          cd App/App
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" Info.plist
+          echo "BUILD_NUMBER=$NEW_BUILD" >> $CM_ENV
+
+      - name: Build
         script: |
-          cd App
           xcode-project build-ipa \
-            --project App.xcodeproj \
-            --scheme "$XCODE_SCHEME"
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --config Release \
+            --archive-flags="-destination 'generic/platform=iOS'"
+    
     artifacts:
-      - App/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - build/ios/xcarchive/*.xcarchive
+
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        submit_to_app_store: false
+        expire_build_submitted_for_review: true
+        beta_groups:
+          - Beta Testers
