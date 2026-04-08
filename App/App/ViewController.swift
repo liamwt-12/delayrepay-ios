@@ -533,6 +533,9 @@ extension ViewController {
                         }
                     },
                     AppleSignInPlugin: {
+                        authorize: function() {
+                            return _callNative('appleSignIn');
+                        },
                         signIn: function() {
                             return _callNative('appleSignIn');
                         }
@@ -540,6 +543,9 @@ extension ViewController {
                     PushNotifications: {
                         checkPermissions: function() {
                             return _callNative('checkPushPermissions');
+                        },
+                        requestPermissions: function() {
+                            return _callNative('registerPush');
                         },
                         register: function() {
                             return _callNative('registerPush');
@@ -560,6 +566,26 @@ extension ViewController {
             // Native haptic feedback
             window.__nativeHaptic = function(style) {
                 _post({ action: 'haptic', style: style || 'medium' });
+            };
+
+            // Capacitor.Plugins.Haptics — matches what the web app calls
+            window.Capacitor.Plugins.Haptics = {
+                impact: function(opts) {
+                    var style = (opts && opts.style) ? opts.style.toLowerCase() : 'light';
+                    _post({ action: 'haptic', style: style });
+                    return Promise.resolve();
+                },
+                notification: function(opts) {
+                    var type = (opts && opts.type) ? opts.type.toLowerCase() : 'success';
+                    _post({ action: 'haptic', style: type });
+                    return Promise.resolve();
+                },
+                selectionStart: function() { return Promise.resolve(); },
+                selectionChanged: function() {
+                    _post({ action: 'haptic', style: 'selection' });
+                    return Promise.resolve();
+                },
+                selectionEnd: function() { return Promise.resolve(); }
             };
 
             // Callback handler — called by native Swift via evaluateJavaScript
