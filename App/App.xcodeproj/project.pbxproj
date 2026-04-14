@@ -16,7 +16,6 @@
 		408D8E862D5A8C3F00B4E1A0 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D8E762D5A8C3F00B4E1A0 /* NotificationManager.swift */; };
 		408D8E872D5A8C3F00B4E1A0 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D8E772D5A8C3F00B4E1A0 /* HapticManager.swift */; };
 		408D8E882D5A8C3F00B4E1A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 408D8E7A2D5A8C3F00B4E1A0 /* Assets.xcassets */; };
-		408D8E892D5A8C3F00B4E1A0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 408D8E7B2D5A8C3F00B4E1A0 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,7 +30,6 @@
 		408D8E782D5A8C3F00B4E1A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		408D8E792D5A8C3F00B4E1A0 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		408D8E7A2D5A8C3F00B4E1A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		408D8E7B2D5A8C3F00B4E1A0 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		408D8E7C2D5A8C3F00B4E1A0 /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -68,7 +66,6 @@
 				408D8E782D5A8C3F00B4E1A0 /* Info.plist */,
 				408D8E792D5A8C3F00B4E1A0 /* App.entitlements */,
 				408D8E7A2D5A8C3F00B4E1A0 /* Assets.xcassets */,
-				408D8E7B2D5A8C3F00B4E1A0 /* LaunchScreen.storyboard */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -151,7 +148,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				408D8E882D5A8C3F00B4E1A0 /* Assets.xcassets in Resources */,
-				408D8E892D5A8C3F00B4E1A0 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
